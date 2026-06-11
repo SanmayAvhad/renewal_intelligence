@@ -2,7 +2,7 @@ import json
 import re
 import pandas as pd
 from ollama import chat
-
+from llm_utils import clean_llm_response, extract_json_array
 import logging
 from loggerfile import setup_logging
 
@@ -99,28 +99,22 @@ Accounts:
 {accounts_text}
 """
 
-def generate_explanations_batch( accounts ):
-    prompt = build_batch_explanation_prompt( accounts )
+def generate_explanations_batch(accounts):
+    prompt = build_batch_explanation_prompt(accounts)
     response = chat(
         model="qwen3:8b",
         think=False,
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
+        messages=[{"role": "user", "content": prompt}],
+        options={
+            "temperature": 0,
+            "num_predict": 4096,
+            "num_ctx": 8192
+        }
     )
-    text = ( response["message"]["content"] .strip() )
-    text = re.sub( r"^```json\s*", "", text )
-    text = re.sub( r"^```\s*", "", text )
-    text = re.sub( r"\s*```$", "", text )
-    match = re.search( r"\[.*\]", text, flags=re.DOTALL )
-    if not match:
-        raise ValueError( f"No JSON array found:\n{text}" )
-    return json.loads( match.group(0) )
+    text = clean_llm_response(response["message"]["content"])
+    return extract_json_array(text)
 
-def build_explanation_report( risk_report_df, batch_size=10 ):
+def build_explanation_report( risk_report_df, batch_size=5 ):
 
     explanation_rows = []
 
@@ -157,6 +151,7 @@ def build_explanation_report( risk_report_df, batch_size=10 ):
     explanation_df = pd.DataFrame(
         explanation_rows
     )
+    logger.info(explanation_rows[:2])
 
     explanation_df = (
         explanation_df

@@ -5,6 +5,7 @@ import math
 import re
 import pandas as pd
 from ollama import chat
+from llm_utils import clean_llm_response, extract_json_array
 import logging
 from loggerfile import setup_logging
 
@@ -267,25 +268,18 @@ Analyze these comments:
 
 
 def extract_batch(prompt):
-
     response = chat(
         model="qwen3:8b",
         think=False,
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
+        messages=[{"role": "user", "content": prompt}],
+        options={
+            "temperature": 0,
+            "num_predict": 4096,
+            "num_ctx": 8192
+        }
     )
-    text = ( response["message"]["content"] .strip() )
-    text = re.sub( r"^```json\s*", "", text )
-    text = re.sub( r"^```\s*", "", text )
-    text = re.sub( r"\s*```$", "", text )
-    match = re.search( r"\[.*\]", text, flags=re.DOTALL )
-    if not match:
-        raise ValueError( f"No JSON array found:\n{text}" )
-    return json.loads( match.group(0) )
+    text = clean_llm_response(response["message"]["content"])
+    return extract_json_array(text)
 
 
 def safe_extract( items, prompt_builder, fallback_rows ):
@@ -297,7 +291,7 @@ def safe_extract( items, prompt_builder, fallback_rows ):
 
     except Exception as e:
 
-        logger.info(
+        logger.warning(
             f"Extraction failed: {e}"
         )
 
@@ -386,7 +380,7 @@ def build_csm_feature_table(
 
 def build_nps_feature_table(
     nps_df,
-    batch_size=10
+    batch_size=5
 ):
 
     result = build_feature_table(

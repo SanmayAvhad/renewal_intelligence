@@ -18,8 +18,6 @@ load_dotenv()
 setup_logging()
 logger = logging.getLogger(__name__)
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
 data = load_data()
 accounts_df = data["accounts"]
 usage_df = data["usage"]
@@ -29,7 +27,7 @@ csm_notes_text = data["csm_notes"]
 
 structured_csm_df = parse_csm_notes( notes_text=csm_notes_text, accounts_df=accounts_df)
 csm_features_df = build_csm_feature_table( structured_csm_df, batch_size=10 )
-nps_features_df = build_nps_feature_table( nps_df, batch_size=10 )
+nps_features_df = build_nps_feature_table( nps_df, batch_size=5 )
 
 logger.info("\nBuilding account features...")
 master_df = build_master_feature_table( accounts_df=accounts_df, usage_df=usage_df, ticket_df=tickets_df, csm_features_df=csm_features_df, nps_features_df=nps_features_df, )
@@ -50,7 +48,7 @@ logger.info("\nKey Insights")
 logger.info( insights_df[ [ "title", "description" ] ] )
 
 logger.info("\nGenerating explanations...")
-final_report_df = ( build_explanation_report( risk_report_df, batch_size=10 ) )
+final_report_df = ( build_explanation_report( risk_report_df, batch_size=5 ) )
 save_final_report( final_report_df, f"{OUTPUT_DIR}/final_risk_report.csv" )
 logger.info("Explanation generation complete")
 
