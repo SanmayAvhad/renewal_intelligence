@@ -50,8 +50,6 @@ Combines information from multiple datasets into a unified account-level view.
 
 ### LLM-Based CSM Note Extraction
 
-Uses Google's Gemini models to extract:
-
 * Account identifiers
 * Company names
 * Dates
