@@ -1,0 +1,6 @@
+insight_type,title,description,metric_1,metric_2,accounts
+sdk_risk,SDK Deprecation Risk,Customers on SDK v3 have 3.15x higher average renewal risk than customers on newer SDK versions.,144.0,45.76,
+competitor_risk,Competitor Evaluation,Accounts evaluating competitors have an average risk score of 128.33 vs 31.0.,128.33,31.0,
+silent_churn,Silent Churn Accounts,2 accounts show positive NPS but declining product usage.,,,"['BrightPath Solutions', 'Meridian Health']"
+executive_escalation,Executive Escalation,"Accounts involving executives (CTO, CIO, VP, CISO) have an average risk score of 92.6 vs 27.0.",92.6,27.0,
+budget_pressure,Budget Pressure,2 accounts mentioned budget constraints with an average risk score of 68.5.,68.5,,
